@@ -10,9 +10,9 @@ from basketball_reference_web_scraper.writers import CSVWriter, RowFormatter, \
 
 
 def player_box_scores(day, month, year, output_type=None, output_file_path=None, output_write_option=None,
-                      json_options=None):
+                      json_options=None,request_args={}):
     try:
-        values = http_client.player_box_scores(day=day, month=month, year=year)
+        values = http_client.player_box_scores(day=day, month=month, year=year,request_args=request_args)
     except requests.exceptions.HTTPError as http_error:
         if http_error.response.status_code == requests.codes.not_found:
             raise InvalidDate(day=day, month=month, year=year)
@@ -32,12 +32,13 @@ def player_box_scores(day, month, year, output_type=None, output_file_path=None,
 
 
 def regular_season_player_box_scores(player_identifier, season_end_year, output_type=None, output_file_path=None,
-                                     output_write_option=None, json_options=None):
+                                     output_write_option=None, json_options=None,request_args={}):
 
     try:
         values = http_client.regular_season_player_box_scores(
             player_identifier=player_identifier,
             season_end_year=season_end_year,
+            request_args=request_args
         )
     except requests.exceptions.HTTPError as http_error:
         if http_error.response.status_code == requests.codes.internal_server_error \
@@ -59,9 +60,9 @@ def regular_season_player_box_scores(player_identifier, season_end_year, output_
 
 
 def season_schedule(season_end_year, output_type=None, output_file_path=None, output_write_option=None,
-                    json_options=None):
+                    json_options=None,request_args={}):
     try:
-        values = http_client.season_schedule(season_end_year)
+        values = http_client.season_schedule(season_end_year,request_args=request_args)
     except requests.exceptions.HTTPError as http_error:
         # https://github.com/requests/requests/blob/master/requests/status_codes.py#L58
         if http_error.response.status_code == requests.codes.not_found:
@@ -82,9 +83,9 @@ def season_schedule(season_end_year, output_type=None, output_file_path=None, ou
 
 
 def players_season_totals(season_end_year, output_type=None, output_file_path=None, output_write_option=None,
-                          json_options=None):
+                          json_options=None,request_args={}):
     try:
-        values = http_client.players_season_totals(season_end_year)
+        values = http_client.players_season_totals(season_end_year,request_args=request_args)
     except requests.exceptions.HTTPError as http_error:
         if http_error.response.status_code == requests.codes.not_found:
             raise InvalidSeason(season_end_year=season_end_year)
@@ -104,11 +105,12 @@ def players_season_totals(season_end_year, output_type=None, output_file_path=No
 
 
 def players_advanced_season_totals(season_end_year, include_combined_values=False, output_type=None,
-                                   output_file_path=None, output_write_option=None, json_options=None):
+                                   output_file_path=None, output_write_option=None, json_options=None,request_args={}):
     try:
         values = http_client.players_advanced_season_totals(
             season_end_year,
-            include_combined_values=include_combined_values
+            include_combined_values=include_combined_values,
+            request_args=request_args
         )
     except requests.exceptions.HTTPError as http_error:
         if http_error.response.status_code == requests.codes.not_found:
@@ -129,9 +131,9 @@ def players_advanced_season_totals(season_end_year, include_combined_values=Fals
 
 
 def team_box_scores(day, month, year, output_type=None, output_file_path=None, output_write_option=None,
-                    json_options=None):
+                    json_options=None,request_args={}):
     try:
-        values = http_client.team_box_scores(day=day, month=month, year=year)
+        values = http_client.team_box_scores(day=day, month=month, year=year,request_args=request_args)
     except requests.exceptions.HTTPError as http_error:
         if http_error.response.status_code == requests.codes.not_found:
             raise InvalidDate(day=day, month=month, year=year)
@@ -151,9 +153,9 @@ def team_box_scores(day, month, year, output_type=None, output_file_path=None, o
 
 
 def play_by_play(home_team, day, month, year, output_type=None, output_file_path=None, output_write_option=None,
-                 json_options=None):
+                 json_options=None,request_args={}):
     try:
-        values = http_client.play_by_play(home_team=home_team, day=day, month=month, year=year)
+        values = http_client.play_by_play(home_team=home_team, day=day, month=month, year=year,request_args=request_args)
     except requests.exceptions.HTTPError as http_error:
         if http_error.response.status_code == requests.codes.not_found:
             raise InvalidDate(day=day, month=month, year=year)
@@ -172,8 +174,8 @@ def play_by_play(home_team, day, month, year, output_type=None, output_file_path
     )
 
 
-def search(term, output_type=None, output_file_path=None, output_write_option=None, json_options=None):
-    values = http_client.search(term=term)
+def search(term, output_type=None, output_file_path=None, output_write_option=None, json_options=None,request_args={}):
+    values = http_client.search(term=term,request_args=request_args)
     return output(
         values=values,
         output_type=output_type,

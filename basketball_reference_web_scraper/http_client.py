@@ -21,15 +21,20 @@ PLAY_BY_PLAY_SCORES_REGEX = "(?P<away_team_score>[0-9]+)-(?P<home_team_score>[0-
 SEARCH_RESULT_RESOURCE_LOCATION_REGEX = '(https?:\/\/www\.basketball-reference\.com\/)?(?P<resource_type>.+?(?=\/)).*\/(?P<resource_identifier>.+).html'
 
 
-def player_box_scores(day, month, year):
+def player_box_scores(day, month, year,request_args={}):
     url = '{BASE_URL}/friv/dailyleaders.cgi?month={month}&day={day}&year={year}'.format(
         BASE_URL=BASE_URL,
         day=day,
         month=month,
         year=year
     )
+    default_args = {
+            'url':url,
+            'allow_redirects':False,
+        }
+    default_args.update(request_args)
 
-    response = requests.get(url=url, allow_redirects=False)
+    response = requests.get(**default_args)
 
     response.raise_for_status()
 
@@ -52,7 +57,7 @@ def player_box_scores(day, month, year):
     raise InvalidDate(day=day, month=month, year=year)
 
 
-def regular_season_player_box_scores(player_identifier, season_end_year):
+def regular_season_player_box_scores(player_identifier, season_end_year,request_args={}):
     # Makes assumption that basketball reference pattern of breaking out player pathing using first character of
     # surname can be derived from the fact that basketball reference also has a pattern of player identifiers
     # starting with first few characters of player's surname
@@ -63,7 +68,14 @@ def regular_season_player_box_scores(player_identifier, season_end_year):
         season_end_year=season_end_year,
     )
 
-    response = requests.get(url=url, allow_redirects=False)
+    default_args = {
+            'url':url,
+            'allow_redirects':False,
+        }
+    default_args.update(request_args)
+
+    response = requests.get(**default_args)
+
     response.raise_for_status()
 
     page = PlayerSeasonBoxScoresPage(html=html.fromstring(response.content))
@@ -87,8 +99,13 @@ def regular_season_player_box_scores(player_identifier, season_end_year):
     return parser.parse(box_scores=page.regular_season_box_scores_table.rows)
 
 
-def schedule_for_month(url):
-    response = requests.get(url=url)
+def schedule_for_month(url,request_args={}):
+    default_args = {
+            'url':url,
+        }
+    default_args.update(request_args)
+
+    response = requests.get(**default_args)
 
     response.raise_for_status()
 
@@ -100,13 +117,18 @@ def schedule_for_month(url):
     return parser.parse_games(games=page.rows)
 
 
-def season_schedule(season_end_year):
+def season_schedule(season_end_year,request_args={}):
     url = '{BASE_URL}/leagues/NBA_{season_end_year}_games.html'.format(
         BASE_URL=BASE_URL,
         season_end_year=season_end_year
     )
 
-    response = requests.get(url=url)
+    default_args = {
+            'url':url,
+        }
+    default_args.update(request_args)
+
+    response = requests.get(**default_args)
 
     response.raise_for_status()
 
@@ -125,13 +147,18 @@ def season_schedule(season_end_year):
     return season_schedule_values
 
 
-def players_season_totals(season_end_year):
+def players_season_totals(season_end_year, request_args={}):
     url = '{BASE_URL}/leagues/NBA_{season_end_year}_totals.html'.format(
         BASE_URL=BASE_URL,
         season_end_year=season_end_year,
     )
 
-    response = requests.get(url=url)
+    default_args = {
+            'url':url,
+        }
+    default_args.update(request_args)
+
+    response = requests.get(**default_args)
 
     response.raise_for_status()
 
@@ -147,13 +174,18 @@ def players_season_totals(season_end_year):
     return parser.parse(table.rows)
 
 
-def players_advanced_season_totals(season_end_year, include_combined_values=False):
+def players_advanced_season_totals(season_end_year, include_combined_values=False,request_args={}):
     url = '{BASE_URL}/leagues/NBA_{season_end_year}_advanced.html'.format(
         BASE_URL=BASE_URL,
         season_end_year=season_end_year,
     )
 
-    response = requests.get(url=url)
+    default_args = {
+            'url':url,
+        }
+    default_args.update(request_args)
+
+    response = requests.get(**default_args)
 
     response.raise_for_status()
 
@@ -170,10 +202,15 @@ def players_advanced_season_totals(season_end_year, include_combined_values=Fals
     return parser.parse(table.get_rows(include_combined_values))
 
 
-def team_box_score(game_url_path):
+def team_box_score(game_url_path, request_args={}):
     url = "{BASE_URL}/{game_url_path}".format(BASE_URL=BASE_URL, game_url_path=game_url_path)
 
-    response = requests.get(url=url)
+    default_args = {
+            'url':url,
+        }
+    default_args.update(request_args)
+
+    response = requests.get(**default_args)
 
     response.raise_for_status()
 
@@ -192,10 +229,20 @@ def team_box_score(game_url_path):
     )
 
 
-def team_box_scores(day, month, year):
+def team_box_scores(day, month, year, request_args={}):
     url = "{BASE_URL}/boxscores/".format(BASE_URL=BASE_URL)
 
-    response = requests.get(url=url, params={"day": day, "month": month, "year": year})
+    default_args = {
+            'url':url,
+            'params':{
+                "day": day,
+                "month": month,
+                "year": year
+            }
+        }
+    default_args.update(request_args)
+
+    response = requests.get(**default_args)
 
     response.raise_for_status()
 
@@ -208,7 +255,7 @@ def team_box_scores(day, month, year):
     ]
 
 
-def play_by_play(home_team, day, month, year):
+def play_by_play(home_team, day, month, year,request_args={}):
     add_0_if_needed = lambda s: "0" + s if len(s) == 1 else s
 
     # the hard-coded `0` in the url assumes we always take the first match of the given date and team.
@@ -216,7 +263,14 @@ def play_by_play(home_team, day, month, year):
         BASE_URL=BASE_URL, year=year, month=add_0_if_needed(str(month)), day=add_0_if_needed(str(day)),
         team_abbr=TEAM_TO_TEAM_ABBREVIATION[home_team]
     )
-    response = requests.get(url=url)
+
+    default_args = {
+            'url':url,
+        }
+    default_args.update(request_args)
+
+    response = requests.get(**default_args)
+
     response.raise_for_status()
     page = PlayByPlayPage(html=html.fromstring(response.content))
 
@@ -232,11 +286,14 @@ def play_by_play(home_team, day, month, year):
                                       home_team=team_name_parser.parse_team_name(team_name=page.home_team_name))
 
 
-def search(term):
-    response = requests.get(
-        url="{BASE_URL}/search/search.fcgi".format(BASE_URL=BASE_URL),
-        params={"search": term}
-    )
+def search(term,request_args={}):
+    default_args = {
+            'url':"{BASE_URL}/search/search.fcgi".format(BASE_URL=BASE_URL),
+            'params':{"search": term}
+        }
+    default_args.update(request_args)
+
+    response = requests.get(**default_args)
 
     response.raise_for_status()
 
@@ -259,12 +316,16 @@ def search(term):
         player_results += parsed_results["players"]
 
         while page.nba_aba_baa_players_pagination_url is not None:
-            response = requests.get(
-                url="{BASE_URL}/search/{pagination_url}".format(
-                    BASE_URL=BASE_URL,
-                    pagination_url=page.nba_aba_baa_players_pagination_url
-                )
-            )
+            default_args = {
+                    'url':"{BASE_URL}/search/{pagination_url}".format(
+                        BASE_URL=BASE_URL,
+                        pagination_url=page.nba_aba_baa_players_pagination_url
+                    ),
+                    'params':{"search": term}
+                }
+            default_args.update(request_args)
+
+            response = requests.get(**default_args)
 
             response.raise_for_status()
 
